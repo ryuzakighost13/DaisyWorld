@@ -46,10 +46,11 @@ public class World {
 			if(patch instanceof Daisy){
 				if(!((Daisy) patch).updateSurvivability()){
 					patch = new EmptyPatch();
-				};
+				}
 			}
 		}
 	}
+	
 	//prints out the world as a grid of patches, shows "-" for empty, "B" for Black, "W" for White. 
 	public void printWorld(){
 		System.out.println("Number of Patches: " + worldSize);
