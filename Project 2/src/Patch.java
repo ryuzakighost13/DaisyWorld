@@ -13,6 +13,10 @@ public abstract class Patch {
 		this.contents = contents;
 	}
 	
+	public void updateTemperature(){
+		
+	}
+	
 	public String getContents(){
 		return contents;
 	}

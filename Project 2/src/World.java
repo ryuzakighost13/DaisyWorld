@@ -6,6 +6,7 @@ public class World {
 	private HashMap<Key,Patch> patchMap;
 	private int worldSize = WorldConstants.X_PATCHES*WorldConstants.Y_PATCHES;
 	private Random randomGenerator;
+	private int tickNum = 0;
 	public World(){		
 		randomGenerator = new Random();
 		patchMap = new HashMap<Key,Patch>();
@@ -38,6 +39,17 @@ public class World {
 		}
 	}
 	
+	public void update(){
+		tickNum ++;
+		for(Patch patch : patchMap.values()){
+			patch.updateTemperature();
+			if(patch instanceof Daisy){
+				if(!((Daisy) patch).updateSurvivability()){
+					patch = new EmptyPatch();
+				};
+			}
+		}
+	}
 	//prints out the world as a grid of patches, shows "-" for empty, "B" for Black, "W" for White. 
 	public void printWorld(){
 		System.out.println("Number of Patches: " + worldSize);
