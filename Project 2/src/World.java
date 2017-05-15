@@ -41,13 +41,17 @@ public class World {
 	
 	public void update(){
 		tickNum ++;
+		ArrayList<Patch> deadPatchList = new ArrayList<Patch>();
 		for(Patch patch : patchMap.values()){
 			patch.updateTemperature();
 			if(patch instanceof Daisy){
 				if(!((Daisy) patch).updateSurvivability()){
-					patch = new EmptyPatch();
+					deadPatchList.add(patch);
 				}
 			}
+		}
+		for(Patch patch: deadPatchList){
+			patch = new EmptyPatch();
 		}
 	}
 	
