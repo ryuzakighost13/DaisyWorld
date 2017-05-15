@@ -38,10 +38,24 @@ public class World {
 		}
 	}
 	
+	//prints out the world as a grid of patches, shows "-" for empty, "B" for Black, "W" for White. 
 	public void printWorld(){
 		System.out.println("Number of Patches: " + worldSize);
-		for(Patch patch : patchMap.values()){
-			System.out.println(patch.getContents());
+		for(int i=0;i<WorldConstants.Y_PATCHES;i++){
+			System.out.print("-");
+			for(int j=0;j<WorldConstants.X_PATCHES;j++){
+				System.out.print("--");
+			}
+			System.out.print("\n|");
+			for(int j=0;j<WorldConstants.X_PATCHES;j++){
+				System.out.print(patchMap.get(new Key(i,j)).getContents() + "|");
+			}
+			System.out.print("\n");
 		}
+		System.out.print("-");
+		for(int j=0;j<WorldConstants.X_PATCHES;j++){
+			System.out.print("--");
+		}
+		System.out.print("\n");
 	}
 }
