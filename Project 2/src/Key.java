@@ -23,7 +23,11 @@ public class Key {
         return result;
     }
     
-    /* Taken from
-     * http://stackoverflow.com/questions/14677993/how-to-create-a-hashmap-with-two-keys-key-pair-value
-     */
+    public int getX(){
+    	return a;
+    }
+    public int getY(){
+    	return b;
+    }
+    
 }

@@ -8,7 +8,7 @@ public abstract class Patch {
 	 * @param albedo The fraction of sunlight being absorbed by the patches
 	 * @param temperature The Initial Temperature of the Patch
 	 */
-	public Patch(double albedo,double temperature,String contents){
+	public Patch(double albedo,double temperature,String contents,Key location){
 		this.albedo = albedo;
 		this.temperature = temperature;
 		this.contents = contents;
@@ -21,5 +21,9 @@ public abstract class Patch {
 	
 	public String getContents(){
 		return contents;
+	}
+	
+	public Key getLocation(){
+		return location;
 	}
 }
