@@ -1,9 +1,11 @@
+import java.lang.Math;
 
 public abstract class Patch {
 	private double albedo;
 	private double temperature;
 	private String contents;
 	private Key location;
+	public double tempDiffuse;
 	/**
 	 * @param albedo The fraction of sunlight being absorbed by the patches
 	 * @param temperature The Initial Temperature of the Patch
@@ -15,8 +17,18 @@ public abstract class Patch {
 		this.location = location;
 	}
 	
-	public void updateTemperature(){
+	public void updateTemperature(double solarLuminosity){
+		double absorbedLuminosity = 0;
+		double localHeating = 0;
 		
+		absorbedLuminosity = ((1 - this.albedo) * solarLuminosity);
+		
+		if(absorbedLuminosity > 0){
+			localHeating = 72*Math.log(absorbedLuminosity) + 80;
+		}else{
+			localHeating = 80;
+		}
+		this.temperature = ((this.temperature + localHeating) / 2);
 	}
 	
 	public String getContents(){
@@ -26,4 +38,15 @@ public abstract class Patch {
 	public Key getLocation(){
 		return location;
 	}
+	
+	public double getTemp(){
+		return temperature;
+	}
+	
+	
+	public void diffuse(){
+		this.temperature/=2;
+		this.temperature+=tempDiffuse;
+	}
+	
 }
