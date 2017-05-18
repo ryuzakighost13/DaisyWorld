@@ -8,6 +8,7 @@ public class Main {
 	private static double surfaceAlbedo;
 	private static double whiteAlbedo;
 	private static double blackAlbedo;
+	private static boolean stableLuminosity;
 
 	public static void main(String[] args) {
 		setupWorld();
@@ -57,8 +58,10 @@ public class Main {
 			System.out.println("d. High solar luminosity");
 			System.out.println("e. Maintain current luminosity");
 			String scenario = reader.next().toLowerCase();
+			stableLuminosity = true;
 			if (scenario.equals("a")) {
 				luminosity = 0.8;
+				stableLuminosity = false;
 			} else if (scenario.equals("b")) {
 				luminosity = 0.6;
 			} else if (scenario.equals("c")) {
@@ -102,7 +105,7 @@ public class Main {
 			reader.close();
 
 			//setup world
-			world = new World(luminosity, surfaceAlbedo, whiteAlbedo,
+			world = new World(luminosity, stableLuminosity, surfaceAlbedo, whiteAlbedo,
 					blackAlbedo, perWhite, perBlack);
 		}
 	}

@@ -16,6 +16,7 @@ public class World {
 	private double blackAlbedo;
 	private double perWhite;
 	private double perBlack;
+	private boolean stableLuminosity;
 
 	/**
 	 * Set up the world using default settings
@@ -27,6 +28,7 @@ public class World {
 		this.blackAlbedo = WorldConstants.DEFAULT_BLACK_ALBEDO;
 		this.perWhite = WorldConstants.PERCENT_OF_WHITE;
 		this.perBlack = WorldConstants.PERCENT_OF_BLACK;
+		this.stableLuminosity = true;
 		setup();
 	}
 
@@ -39,9 +41,10 @@ public class World {
 	 * @param perWhite start percentage of white daisies
 	 * @param perBlack start percentage of black daisies
 	 */
-	public World(double solarLuminosity, double surfaceAlbedo, double whiteAlbedo,
+	public World(double solarLuminosity, boolean stableLuminosity, double surfaceAlbedo, double whiteAlbedo,
 				 double blackAlbedo, double perWhite, double perBlack) {
 		this.solarLuminosity = solarLuminosity;
+		this.stableLuminosity = stableLuminosity;
 		this.surfaceAlbedo = surfaceAlbedo;
 		this.whiteAlbedo = whiteAlbedo;
 		this.blackAlbedo = blackAlbedo;
@@ -133,6 +136,22 @@ public class World {
 	}
 	
 	public void updateTemperature(){
+		//ramp up ramp down scenario
+		if(!stableLuminosity) {
+			if (tickNum > 200 && tickNum <= 400) {
+				solarLuminosity += 0.005;
+			}
+			if (tickNum > 600 && tickNum <= 850) {
+				solarLuminosity -= 0.0025;
+			}
+			if (solarLuminosity > 3.000) {
+				solarLuminosity = 3.000;
+			}
+			if (solarLuminosity < 0.001) {
+				solarLuminosity = 0.001;
+			}
+		}
+
 		for(int i=0; i < WorldConstants.X_PATCHES; i++){
 			for(int j=0; j < WorldConstants.Y_PATCHES; j++){
 				Patch patch = patchMap.get(new Key(i,j));
