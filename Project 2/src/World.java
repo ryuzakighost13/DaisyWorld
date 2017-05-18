@@ -1,3 +1,5 @@
+import sun.security.acl.WorldGroupImpl;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -8,18 +10,68 @@ public class World {
 	private Random randomGenerator;
 	private int tickNum = 0;
 	private ArrayList<Key> emptyPatchList;
-	private double solarLuminosity = WorldConstants.DEFAULT_LUMINOSITY;
-	public World(){		
+	private double solarLuminosity;
+	private double surfaceAlbedo;
+	private double whiteAlbedo;
+	private double blackAlbedo;
+	private double perWhite;
+	private double perBlack;
+
+	/**
+	 * Set up the world using default settings
+	 */
+	public World(){
+		this.solarLuminosity = WorldConstants.DEFAULT_LUMINOSITY;
+		this.surfaceAlbedo = WorldConstants.DEFAULT_SURFACE_ALBEDO;
+		this.whiteAlbedo = WorldConstants.DEFAULT_WHITE_ALBEDO;
+		this.blackAlbedo = WorldConstants.DEFAULT_BLACK_ALBEDO;
+		this.perWhite = WorldConstants.PERCENT_OF_WHITE;
+		this.perBlack = WorldConstants.PERCENT_OF_BLACK;
+		setup();
+	}
+
+	/**
+	 * Set up world using customized settings
+	 * @param solarLuminosity solar luminosity
+	 * @param surfaceAlbedo albedo of surface
+	 * @param whiteAlbedo albedo of white daisies
+	 * @param blackAlbedo albedo of black daisies
+	 * @param perWhite start percentage of white daisies
+	 * @param perBlack start percentage of black daisies
+	 */
+	public World(double solarLuminosity, double surfaceAlbedo, double whiteAlbedo,
+				 double blackAlbedo, double perWhite, double perBlack) {
+		this.solarLuminosity = solarLuminosity;
+		this.surfaceAlbedo = surfaceAlbedo;
+		this.whiteAlbedo = whiteAlbedo;
+		this.blackAlbedo = blackAlbedo;
+		this.perWhite = perWhite;
+		this.perBlack = perBlack;
+		setup();
+	}
+
+	/**
+	 * Set up the world
+	 */
+	public void setup() {
+		/*
+		System.out.println("luminosity: " + solarLuminosity);
+		System.out.println("surfaceAlbedo: " + surfaceAlbedo);
+		System.out.println("whiteAlbedo: " + whiteAlbedo);
+		System.out.println("blackAlbedo: " + blackAlbedo);
+		System.out.println("white Percentage: " + perWhite);
+		System.out.println("black Percentage: " + perBlack);
+		*/
 		randomGenerator = new Random();
 		patchMap = new HashMap<Key,Patch>();
 		emptyPatchList = new ArrayList<Key>();
-		int initBlack = (int) Math.round(worldSize*WorldConstants.PERCENT_OF_BLACK);
-		int initWhite = (int) Math.round(worldSize*WorldConstants.PERCENT_OF_WHITE);
+		int initBlack = (int) Math.round(worldSize*perBlack);
+		int initWhite = (int) Math.round(worldSize*perWhite);
 		//Initialize the patch hashmap
 		for(int i=0; i < WorldConstants.X_PATCHES; i++){
 			for(int j=0; j < WorldConstants.Y_PATCHES; j++){
 				Key key = new Key(i,j);
-				patchMap.put(key , new EmptyPatch(key));
+				patchMap.put(key , new EmptyPatch(key, surfaceAlbedo));
 				emptyPatchList.add(key);
 			}
 		}
@@ -27,7 +79,8 @@ public class World {
 		while(initBlack > 0 && emptyPatchList.size()>0){
 			int i = randomGenerator.nextInt(emptyPatchList.size());
 			Key randKey = emptyPatchList.get(i);
-			patchMap.put(randKey, new BlackDaisy(randKey,(int)(Math.random()*WorldConstants.DEFAULT_DAISY_MAX_AGE)));
+			patchMap.put(randKey, new BlackDaisy(randKey,
+					(int)(Math.random()*WorldConstants.DEFAULT_DAISY_MAX_AGE), blackAlbedo));
 			emptyPatchList.remove(i);
 			initBlack --;
 		}
@@ -35,7 +88,8 @@ public class World {
 		while(initWhite > 0 && emptyPatchList.size()>0){
 			int i = randomGenerator.nextInt(emptyPatchList.size());
 			Key randKey = emptyPatchList.get(i);
-			patchMap.put(randKey, new WhiteDaisy(randKey,(int)(Math.random()*WorldConstants.DEFAULT_DAISY_MAX_AGE)));
+			patchMap.put(randKey, new WhiteDaisy(randKey,
+					(int)(Math.random()*WorldConstants.DEFAULT_DAISY_MAX_AGE), whiteAlbedo));
 			emptyPatchList.remove(i);
 			initWhite --;
 		}
@@ -53,9 +107,10 @@ public class World {
 					if(!((Daisy) patch).updateSurvivability()){
 						Key loc = patch.getLocation();
 						double temp = patch.getTemp();
-						patchMap.put(loc , new EmptyPatch(loc,temp));
+						patchMap.put(loc , new EmptyPatch(loc,temp, surfaceAlbedo));
 					}else{
-						double seedThreshold = ((0.1457 * patch.getTemp()) - (0.0032 * (Math.pow(patch.getTemp(),2)))-0.6443);
+						double seedThreshold = ((0.1457 * patch.getTemp()) -
+								(0.0032 * (Math.pow(patch.getTemp(),2)))-0.6443);
 						double rand = Math.random();
 						if(rand < seedThreshold){
 							ArrayList<Patch> emptyPatches = getEmptyAdjacentPatches(i, j);
@@ -64,9 +119,9 @@ public class World {
 								Patch seedPatch = emptyPatches.get(index);
 								Key key = seedPatch.getLocation();
 								if(patch instanceof WhiteDaisy){
-									patchMap.put(key, new WhiteDaisy(key,seedPatch.getTemp()));
+									patchMap.put(key, new WhiteDaisy(key,seedPatch.getTemp(), whiteAlbedo));
 								}else if(patch instanceof BlackDaisy){
-									patchMap.put(key, new BlackDaisy(key,seedPatch.getTemp()));
+									patchMap.put(key, new BlackDaisy(key,seedPatch.getTemp(), blackAlbedo));
 								}
 							}
 						}
@@ -135,7 +190,7 @@ public class World {
 		return new Key(x%WorldConstants.X_PATCHES,y%WorldConstants.Y_PATCHES);
 	}
 	
-	ArrayList<Patch> getEmptyAdjacentPatches(int x, int y){
+	private ArrayList<Patch> getEmptyAdjacentPatches(int x, int y){
 		ArrayList<Patch> emptyPatches = new ArrayList<Patch>();
 		for(int i=-1;i<=1;i++){
 			for(int j=-1;j<=1;j++){

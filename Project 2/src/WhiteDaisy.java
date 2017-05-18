@@ -2,13 +2,13 @@
 public class WhiteDaisy extends Patch implements Daisy {
 	private int age;
 	
-	public WhiteDaisy(Key location,int age){
-		super(WorldConstants.DEFAULT_WHITE_ALBEDO,WorldConstants.INITIAL_TEMPERATURE,"W",location);
+	public WhiteDaisy(Key location, int age, double albedo){
+		super(albedo,WorldConstants.INITIAL_TEMPERATURE,"W",location);
 		this.age = age;
 	}
 	
-	public WhiteDaisy(Key location, double temp){
-		super(WorldConstants.DEFAULT_WHITE_ALBEDO,temp,"W",location);
+	public WhiteDaisy(Key location, double temp, double albedo){
+		super(albedo,temp,"W",location);
 		age = 1;
 	}
 

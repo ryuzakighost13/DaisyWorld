@@ -1,12 +1,12 @@
 
 public class BlackDaisy extends Patch implements Daisy {
 	private int age;
-	public BlackDaisy(Key location, int age){
-		super(WorldConstants.DEFAULT_BLACK_ALBEDO,WorldConstants.INITIAL_TEMPERATURE,"B",location);
+	public BlackDaisy(Key location, int age, double albedo){
+		super(albedo,WorldConstants.INITIAL_TEMPERATURE,"B",location);
 		this.age = age;
 	}
-	public BlackDaisy(Key location, double temp){
-		super(WorldConstants.DEFAULT_BLACK_ALBEDO,temp,"B",location);
+	public BlackDaisy(Key location, double temp, double albedo){
+		super(albedo,temp,"B",location);
 		age = 1;
 	}
 
