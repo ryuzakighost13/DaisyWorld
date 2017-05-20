@@ -11,14 +11,32 @@ public class Main {
 	private static boolean stableLuminosity;
 
 	public static void main(String[] args) {
-		setupWorld();
+		//setupWorld();
+		world = new World();
+		printStart();
+		
 		for(int i=0;i<WorldConstants.RUN_DURATION;i++){
 			world.printWorld();
 			world.update();
 		}
 		world.printWorld();
+		
+		world.printFinal();
 	}
 
+	
+	private static void printStart(){
+		if(WorldConstants.OUTPUT_TYPE == 1){
+			System.out.println("Tick,Temperature");
+		}else if(WorldConstants.OUTPUT_TYPE == 2){
+			System.out.println("Tick,Soil Quality");
+		}else if(WorldConstants.OUTPUT_TYPE == 3){
+			System.out.println("Tick,Number of Patches,White daisies,Black daisies");
+		}else if(WorldConstants.OUTPUT_TYPE == 4){
+			System.out.println("Tick,Number of Patches,White daisies,Black daisies,Temperature,Soil Quality");
+		}
+	}
+	
 	/**
 	 * Set up the world using default or customize settings
 	 */

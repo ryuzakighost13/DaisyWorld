@@ -1,4 +1,4 @@
-import sun.security.acl.WorldGroupImpl;
+//import sun.security.acl.WorldGroupImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +17,11 @@ public class World {
 	private double perWhite;
 	private double perBlack;
 	private boolean stableLuminosity;
+	
+	private double sumTemp = 0;
+	private double sumSoil = 0;
+	private int sumWhite = 0;
+	private int sumBlack = 0;
 
 	/**
 	 * Set up the world using default settings
@@ -74,7 +79,7 @@ public class World {
 		for(int i=0; i < WorldConstants.X_PATCHES; i++){
 			for(int j=0; j < WorldConstants.Y_PATCHES; j++){
 				Key key = new Key(i,j);
-				patchMap.put(key , new EmptyPatch(key, surfaceAlbedo));
+				patchMap.put(key , new EmptyPatch(key, surfaceAlbedo,Math.random()*(1-WorldConstants.DEFAULT_MIN_SOIL) + WorldConstants.DEFAULT_MIN_SOIL));
 				emptyPatchList.add(key);
 			}
 		}
@@ -82,8 +87,9 @@ public class World {
 		while(initBlack > 0 && emptyPatchList.size()>0){
 			int i = randomGenerator.nextInt(emptyPatchList.size());
 			Key randKey = emptyPatchList.get(i);
+			double quality = patchMap.get(randKey).getSoilDegradation();
 			patchMap.put(randKey, new BlackDaisy(randKey,
-					(int)(Math.random()*WorldConstants.DEFAULT_DAISY_MAX_AGE), blackAlbedo));
+					(int)(Math.random()*WorldConstants.MAX_AGE_BLACK), blackAlbedo,quality));
 			emptyPatchList.remove(i);
 			initBlack --;
 		}
@@ -91,8 +97,9 @@ public class World {
 		while(initWhite > 0 && emptyPatchList.size()>0){
 			int i = randomGenerator.nextInt(emptyPatchList.size());
 			Key randKey = emptyPatchList.get(i);
+			double quality = patchMap.get(randKey).getSoilDegradation();
 			patchMap.put(randKey, new WhiteDaisy(randKey,
-					(int)(Math.random()*WorldConstants.DEFAULT_DAISY_MAX_AGE), whiteAlbedo));
+					(int)(Math.random()*WorldConstants.MAX_AGE_WHITE), whiteAlbedo,quality));
 			emptyPatchList.remove(i);
 			initWhite --;
 		}
@@ -110,29 +117,41 @@ public class World {
 					if(!((Daisy) patch).updateSurvivability()){
 						Key loc = patch.getLocation();
 						double temp = patch.getTemp();
-						patchMap.put(loc , new EmptyPatch(loc,temp, surfaceAlbedo));
+						double quality = patch.getSoilDegradation();
+						patchMap.put(loc , new EmptyPatch(loc,temp, surfaceAlbedo,quality));
 					}else{
 						double seedThreshold = ((0.1457 * patch.getTemp()) -
 								(0.0032 * (Math.pow(patch.getTemp(),2)))-0.6443);
 						double rand = Math.random();
-						if(rand < seedThreshold){
+						if(rand < seedThreshold && ((Daisy)patch).getAge() > 2){
 							ArrayList<Patch> emptyPatches = getEmptyAdjacentPatches(i, j);
-							if(emptyPatches.size()>0){
+							while(emptyPatches.size()>0){
 								int index = (int)(Math.random()*(emptyPatches.size()-1));
 								Patch seedPatch = emptyPatches.get(index);
+								emptyPatches.remove(seedPatch);
 								Key key = seedPatch.getLocation();
 								if(patch instanceof WhiteDaisy){
-									patchMap.put(key, new WhiteDaisy(key,seedPatch.getTemp(), whiteAlbedo));
+									if(patch.soilQuality > WorldConstants.SOIL_SURVIVAL_WHITE){
+										patchMap.put(key, new WhiteDaisy(key,seedPatch.getTemp(), whiteAlbedo,seedPatch.getSoilDegradation()));
+									}
 								}else if(patch instanceof BlackDaisy){
-									patchMap.put(key, new BlackDaisy(key,seedPatch.getTemp(), blackAlbedo));
+									if(patch.soilQuality > WorldConstants.SOIL_SURVIVAL_BLACK){
+										patchMap.put(key, new BlackDaisy(key,seedPatch.getTemp(), blackAlbedo,seedPatch.getSoilDegradation()));
+									}
 								}
 							}
 						}
 					}
+				}else{
+					patch.reduceSoilDegradation();
 				}
 			}
 		}
 		
+		sumTemp += this.calculateGlobalTemp();
+		sumSoil += this.calculateSoilQuality();
+		sumWhite += this.calculateWhiteDaisy();
+		sumBlack += this.calculateBlackDaisy();
 	}
 	
 	public void updateTemperature(){
@@ -170,6 +189,36 @@ public class World {
 			count+=1;
 		}
 		return temp/count;
+	}
+	
+	private double calculateSoilQuality(){
+		double temp = 0;
+		int count = 0;
+		for(Patch patch : patchMap.values()){
+			temp+=patch.getSoilDegradation();
+			count+=1;
+		}
+		return temp/count;
+	}
+	
+	private int calculateWhiteDaisy(){
+		int count = 0;
+		for(Patch patch : patchMap.values()){
+			if(patch instanceof WhiteDaisy){
+				count+=1;
+			}
+		}
+		return count;
+	}
+	
+	private int calculateBlackDaisy(){
+		int count = 0;
+		for(Patch patch : patchMap.values()){
+			if(patch instanceof BlackDaisy){
+				count+=1;
+			}
+		}
+		return count;
 	}
 	
 	private void setDiffusion(){
@@ -257,9 +306,27 @@ public class World {
 	
 	//prints out the world as a grid of patches, shows "-" for empty, "B" for Black, "W" for White. 
 	public void printWorld(){
+		
+		if(WorldConstants.OUTPUT_TYPE == 1){
+			printWorldHeatGraph();
+			return;
+		}else if(WorldConstants.OUTPUT_TYPE == 2){
+			printWorldSoilGraph();
+			return;
+		}else if(WorldConstants.OUTPUT_TYPE == 3){
+			System.out.println(tickNum+","+worldSize+","+calculateWhiteDaisy()+","+calculateBlackDaisy());
+			return;
+		}else if(WorldConstants.OUTPUT_TYPE == 4){
+			System.out.println(tickNum+","+worldSize+","+calculateWhiteDaisy()+","+calculateBlackDaisy()+","+calculateGlobalTemp()+","+calculateSoilQuality());
+			return;
+		}
+		
 		System.out.println("Number of Patches: " + worldSize);
 		System.out.println("Current tick: " + tickNum);
 		System.out.println("Current global temperature: " + calculateGlobalTemp());
+		System.out.println("Current soil quality: " + calculateSoilQuality());
+		System.out.println("White daisy population: " + calculateWhiteDaisy());
+		System.out.println("Black daisy population: " + calculateBlackDaisy());
 		for(int i=0;i<WorldConstants.Y_PATCHES;i++){
 			System.out.print("-");
 			for(int j=0;j<WorldConstants.X_PATCHES;j++){
@@ -277,4 +344,23 @@ public class World {
 		}
 		System.out.print("\n");
 	}
+	
+	public void printWorldSoilGraph(){
+		System.out.println(tickNum+","+calculateSoilQuality());
+	}
+	
+	public void printWorldHeatGraph(){
+		System.out.println(tickNum+","+calculateGlobalTemp());
+	}
+	
+	public void printFinal(){
+		if(WorldConstants.PRINT_FINAL == 1){
+			System.out.println("Tick Number: " +tickNum);
+			System.out.println("Average Global Temperature: "+sumTemp/tickNum);
+			System.out.println("Average Soil Quality: "+sumSoil/tickNum);
+			System.out.println("Average Number of White Daisies: "+((double)sumWhite)/tickNum);
+			System.out.println("Average Number of Black Daisies: "+((double)sumBlack)/tickNum);
+		}
+	}
+	
 }

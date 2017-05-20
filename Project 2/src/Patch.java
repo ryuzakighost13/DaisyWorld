@@ -6,15 +6,17 @@ public abstract class Patch {
 	private String contents;
 	private Key location;
 	public double tempDiffuse;
+	protected double soilQuality;
 	/**
 	 * @param albedo The fraction of sunlight being absorbed by the patches
 	 * @param temperature The Initial Temperature of the Patch
 	 */
-	public Patch(double albedo,double temperature,String contents,Key location){
+	public Patch(double albedo,double temperature,String contents,Key location, double soilQuality){
 		this.albedo = albedo;
 		this.temperature = temperature;
 		this.contents = contents;
 		this.location = location;
+		this.soilQuality = soilQuality;
 	}
 	
 	public void updateTemperature(double solarLuminosity){
@@ -47,6 +49,17 @@ public abstract class Patch {
 	public void diffuse(){
 		this.temperature/=2;
 		this.temperature+=tempDiffuse;
+	}
+	
+	public void reduceSoilDegradation(){
+		this.soilQuality += WorldConstants.SOIL_RECOVERY;
+		if(this.soilQuality > 1){
+			this.soilQuality = 1;
+		}
+	}
+	
+	public double getSoilDegradation(){
+		return this.soilQuality;
 	}
 	
 }
