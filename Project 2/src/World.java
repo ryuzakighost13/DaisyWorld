@@ -16,7 +16,7 @@ public class World {
 	private double blackAlbedo;
 	private double perWhite;
 	private double perBlack;
-	private boolean stableLuminosity;
+	private int stableLuminosity;
 	
 	private double sumTemp = 0;
 	private double sumSoil = 0;
@@ -33,7 +33,7 @@ public class World {
 		this.blackAlbedo = WorldConstants.DEFAULT_BLACK_ALBEDO;
 		this.perWhite = WorldConstants.PERCENT_OF_WHITE;
 		this.perBlack = WorldConstants.PERCENT_OF_BLACK;
-		this.stableLuminosity = true;
+		this.stableLuminosity = WorldConstants.LUMINOSITY_MODEL;
 		setup();
 	}
 
@@ -46,7 +46,7 @@ public class World {
 	 * @param perWhite start percentage of white daisies
 	 * @param perBlack start percentage of black daisies
 	 */
-	public World(double solarLuminosity, boolean stableLuminosity, double surfaceAlbedo, double whiteAlbedo,
+	public World(double solarLuminosity, int stableLuminosity, double surfaceAlbedo, double whiteAlbedo,
 				 double blackAlbedo, double perWhite, double perBlack) {
 		this.solarLuminosity = solarLuminosity;
 		this.stableLuminosity = stableLuminosity;
@@ -130,13 +130,46 @@ public class World {
 								Patch seedPatch = emptyPatches.get(index);
 								emptyPatches.remove(seedPatch);
 								Key key = seedPatch.getLocation();
+
 								if(patch instanceof WhiteDaisy){
-									if(patch.soilQuality > WorldConstants.SOIL_SURVIVAL_WHITE){
+									double soil;
+									if(1 - WorldConstants.SOIL_SURVIVAL_WHITE == 0){
+										soil = patch.soilQuality * 400;
+									}else if(patch.soilQuality - WorldConstants.SOIL_SURVIVAL_WHITE <= 0){
+											soil = 0;
+									}else{
+										soil = (patch.soilQuality - WorldConstants.SOIL_SURVIVAL_WHITE)/(1-WorldConstants.SOIL_SURVIVAL_WHITE) * 400;
+										if(patch.soilQuality - WorldConstants.SOIL_SURVIVAL_WHITE <= 0){
+											soil = 0;
+										}
+									}
+									
+									if(WorldConstants.SOIL_SURVIVAL_WHITE < 0){
+										soil = 400;
+									}
+									if(patch.soilQuality > WorldConstants.SOIL_SURVIVAL_WHITE && rand < Math.pow(soil,0.5)/20){
 										patchMap.put(key, new WhiteDaisy(key,seedPatch.getTemp(), whiteAlbedo,seedPatch.getSoilDegradation()));
+										break;
 									}
 								}else if(patch instanceof BlackDaisy){
-									if(patch.soilQuality > WorldConstants.SOIL_SURVIVAL_BLACK){
+									double soil;
+									if(1 - WorldConstants.SOIL_SURVIVAL_BLACK == 0){
+										soil = patch.soilQuality * 400;
+									}else if(patch.soilQuality - WorldConstants.SOIL_SURVIVAL_BLACK <= 0){
+											soil = 0;
+									}else{
+										soil = (patch.soilQuality - WorldConstants.SOIL_SURVIVAL_BLACK)/(1-WorldConstants.SOIL_SURVIVAL_BLACK) * 400;
+										if(patch.soilQuality - WorldConstants.SOIL_SURVIVAL_BLACK <= 0){
+											soil = 0;
+										}
+									}
+									
+									if(WorldConstants.SOIL_SURVIVAL_BLACK < 0){
+										soil = 400;
+									}
+									if(patch.soilQuality > WorldConstants.SOIL_SURVIVAL_BLACK && rand < Math.pow(soil,0.5)/20){
 										patchMap.put(key, new BlackDaisy(key,seedPatch.getTemp(), blackAlbedo,seedPatch.getSoilDegradation()));
+										break;
 									}
 								}
 							}
@@ -156,7 +189,7 @@ public class World {
 	
 	public void updateTemperature(){
 		//ramp up ramp down scenario
-		if(!stableLuminosity) {
+		if(stableLuminosity==1) {
 			if (tickNum > 200 && tickNum <= 400) {
 				solarLuminosity += 0.005;
 			}
@@ -317,7 +350,7 @@ public class World {
 			System.out.println(tickNum+","+worldSize+","+calculateWhiteDaisy()+","+calculateBlackDaisy());
 			return;
 		}else if(WorldConstants.OUTPUT_TYPE == 4){
-			System.out.println(tickNum+","+worldSize+","+calculateWhiteDaisy()+","+calculateBlackDaisy()+","+calculateGlobalTemp()+","+calculateSoilQuality());
+			System.out.println(tickNum+","+worldSize+","+calculateWhiteDaisy()+","+calculateBlackDaisy()+","+calculateGlobalTemp()+","+calculateSoilQuality() + "," + this.solarLuminosity);
 			return;
 		}
 		

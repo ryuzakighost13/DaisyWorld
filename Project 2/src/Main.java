@@ -8,10 +8,15 @@ public class Main {
 	private static double surfaceAlbedo;
 	private static double whiteAlbedo;
 	private static double blackAlbedo;
-	private static boolean stableLuminosity;
+	private static int stableLuminosity;
 
 	public static void main(String[] args) {
 		//setupWorld();
+		
+		/**System.out.println("White Albedo: " + WorldConstants.DEFAULT_WHITE_ALBEDO);
+		System.out.println("Black Albedo: " + WorldConstants.DEFAULT_BLACK_ALBEDO);
+		System.out.println("Surface Albedo: " + WorldConstants.DEFAULT_SURFACE_ALBEDO);
+		*/
 		world = new World();
 		printStart();
 		
@@ -33,7 +38,7 @@ public class Main {
 		}else if(WorldConstants.OUTPUT_TYPE == 3){
 			System.out.println("Tick,Number of Patches,White daisies,Black daisies");
 		}else if(WorldConstants.OUTPUT_TYPE == 4){
-			System.out.println("Tick,Number of Patches,White daisies,Black daisies,Temperature,Soil Quality");
+			System.out.println("Tick,Number of Patches,White daisies,Black daisies,Temperature,Soil Quality,Luminosity");
 		}
 	}
 	
@@ -76,10 +81,10 @@ public class Main {
 			System.out.println("d. High solar luminosity");
 			System.out.println("e. Maintain current luminosity");
 			String scenario = reader.next().toLowerCase();
-			stableLuminosity = true;
+			stableLuminosity = 0;
 			if (scenario.equals("a")) {
 				luminosity = 0.8;
-				stableLuminosity = false;
+				stableLuminosity = 1;
 			} else if (scenario.equals("b")) {
 				luminosity = 0.6;
 			} else if (scenario.equals("c")) {
