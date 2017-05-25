@@ -1,22 +1,31 @@
+/** Main class that runs the program
+*/
+
 import java.util.Scanner;
 
 public class Main {
+	/* The world to be simulated */
 	private static World world;
+	/* Starting percentage of white daisies */
 	private static double perWhite;
+	/* Starting percentage of black daisies */
 	private static double perBlack;
+	/* Starting luminosity of the world */
 	private static double luminosity;
+	/* Starting surface albedo of the world */
 	private static double surfaceAlbedo;
+	/* Starting albedo of white daisies */
 	private static double whiteAlbedo;
+	/* Starting albedo of black daisies */
 	private static double blackAlbedo;
+	/* Luminosity type for the simulation to undergo (see WorldConstants for 
+	 * what different values mean)
+	*/
 	private static int stableLuminosity;
 
 	public static void main(String[] args) {
 		//setupWorld();
-		
-		/**System.out.println("White Albedo: " + WorldConstants.DEFAULT_WHITE_ALBEDO);
-		System.out.println("Black Albedo: " + WorldConstants.DEFAULT_BLACK_ALBEDO);
-		System.out.println("Surface Albedo: " + WorldConstants.DEFAULT_SURFACE_ALBEDO);
-		*/
+
 		world = new World();
 		printStart();
 		
@@ -29,7 +38,8 @@ public class Main {
 		world.printFinal();
 	}
 
-	
+	/** Print the headings for each column in the output (used for csv files)
+	*/
 	private static void printStart(){
 		if(WorldConstants.OUTPUT_TYPE == 1){
 			System.out.println("Tick,Temperature");

@@ -1,3 +1,5 @@
+/** Key class used to encode patch locations into a hashmap
+*/
 
 public class Key {
 	private int a;
@@ -17,6 +19,7 @@ public class Key {
 	}
 	
     @Override
+	/* Get a hash value for the key */
     public int hashCode() {
         int result = a;
         result = 31 * result + b;

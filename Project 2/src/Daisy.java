@@ -1,3 +1,5 @@
+/** Daisy interface for both white and black daisies
+*/
 
 public interface Daisy {
 	

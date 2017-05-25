@@ -1,11 +1,20 @@
+/** Abstract patch class to represent each cell of the simulation
+*/
+
 import java.lang.Math;
 
 public abstract class Patch {
+	/* Albedo of the cell */
 	private double albedo;
+	/* Temperature of the cell */
 	private double temperature;
+	/* What the cell prints when called */
 	private String contents;
+	/* Location of the cell in the hashmap */
 	private Key location;
+	/* Diffusion value of the patch (calculated and then used later) */
 	public double tempDiffuse;
+	/* Soil quality of the patch */
 	protected double soilQuality;
 	/**
 	 * @param albedo The fraction of sunlight being absorbed by the patches
@@ -19,6 +28,9 @@ public abstract class Patch {
 		this.soilQuality = soilQuality;
 	}
 	
+	/** Updates the temperature of the patch based on the same calculations from the netlogo
+	*** model
+	*/
 	public void updateTemperature(double solarLuminosity){
 		double absorbedLuminosity = 0;
 		double localHeating = 0;
@@ -45,12 +57,16 @@ public abstract class Patch {
 		return temperature;
 	}
 	
-	
+	/** Diffuse it's own temperature
+	*/
 	public void diffuse(){
 		this.temperature/=2;
 		this.temperature+=tempDiffuse;
+		this.tempDiffuse = 0;
 	}
 	
+	/** Reduces the soil degradation each tick (if the cell is empty)
+	*/
 	public void reduceSoilDegradation(){
 		this.soilQuality += WorldConstants.SOIL_RECOVERY;
 		if(this.soilQuality > 1){
