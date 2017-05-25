@@ -31,6 +31,10 @@ public class WorldConstants {
 	/* The luminosity model to follow during simulation
 	 * 0 = Stable luminosity
 	 * 1 = Luminosity fluctuates from low-high-low over a period of time
+	 * 2 = Luminosity increases from default value 
+	 * 3 = Luminosity decreases from default value
+	 * 4 = luminosity follows sine curve
+	 * 5 = luminosity randomly changes once instantly
 	*/
 	public final static int LUMINOSITY_MODEL = 0;
 	

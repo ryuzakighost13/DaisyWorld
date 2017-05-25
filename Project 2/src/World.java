@@ -149,6 +149,26 @@ public class World {
 				solarLuminosity = 0.001;
 			}
 		}
+		
+		//ramp up scenario
+		if(stableLuminosity==2){
+			solarLuminosity += 0.001;
+		}
+		//ramp down scenario
+		if(stableLuminosity==3){
+			solarLuminosity -= 0.001;
+		}
+		//sine curve scenario
+		if(stableLuminosity==4){
+			solarLuminosity = Math.sin((tickNum*Math.PI)/(180));
+		}
+		//rapid change scenario
+		if(stableLuminosity==5){
+			if(tickNum == 200){
+				Random random = new Random();
+				solarLuminosity = random.nextDouble()*3;
+			}
+		}
 		/* Update the temperature of each patch */
 		for(int i=0; i < WorldConstants.X_PATCHES; i++){
 			for(int j=0; j < WorldConstants.Y_PATCHES; j++){
